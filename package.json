@@ -1,0 +1,49 @@
+{
+    "name": "echolang-vscode",
+    "displayName": "Echo Lang",
+    "description": "The Echo programming language support for Visual Studio Code",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.90.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "echo",
+                "aliases": [
+                    "Echo",
+                    "eco"
+                ],
+                "extensions": [
+                    ".eco",
+                    ".echo"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "echo",
+                "scopeName": "source.echo",
+                "path": "./syntaxes/eco.tmLanguage.json"
+            },
+            {
+                "scopeName": "text.html.markdown.echo",
+                "path": "./syntaxes/eco.markdown.json"
+            },
+            {
+                "scopeName": "markdown.echo.codeblock",
+                "path": "./syntaxes/eco.codeblocks.json",
+                "injectTo": [
+                    "text.html.markdown"
+                ],
+                "embeddedLanguages": {
+                    "meta.embedded.block.echo": "echo"
+                }
+            }
+        ]
+    }
+}

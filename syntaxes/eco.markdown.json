@@ -1,0 +1,15 @@
+{
+    "name": "Echo Markdown",
+    "scopeName": "text.html.markdown.echo",
+    "fileTypes": [
+        "emd"
+    ],
+    "patterns": [
+        {
+            "include": "markdown.echo.codeblock"
+        },
+        {
+            "include": "text.html.markdown"
+        }
+    ]
+}

@@ -1,0 +1,107 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Echo",
+	"scopeName": "source.echo",
+	"patterns": [
+        {
+            "include": "#comments"
+        },
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#variables"
+		},
+		{
+			"include": "#constants"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+                {
+                    "name": "keyword.control.eco",
+                    "match": "\\b(echo|if|while|for|return)\\b"
+                },
+                {
+					"name": "keyword.operator.arithmetic.eco",
+					"match": "\\+|-|\\*\\*|\\*|/|%|\\+\\+|--"
+				}
+            ]
+		},
+        "types": {
+            "patterns": [
+                {
+                    "name": "storage.type.eco",
+                    "match": "\\b(bool|float|double|float(32|64)|u?int(8|16|32|64|128)?)\\b"
+                }   
+            ]
+        },
+		"strings": {
+			"name": "string.quoted.double.eco",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.eco",
+					"match": "\\\\."
+				}
+			]
+		},
+		"variables": {
+			"patterns": [
+				{
+					"name": "variable.other.eco",
+					"match": "\\$[a-zA-Z_][a-zA-Z0-9_]*"
+				}
+			]
+		},
+		"constants": {
+			"patterns": [
+				{
+                    "name": "constant.numeric.decimal.eco",
+                    "match": "\\b\\d+(\\.\\d+)?(f)?\\b",
+                    "captures": {
+                        "1": {
+                            "name": "constant.numeric.decimal.value.eco"
+                        },
+                        "2": {
+                            "name": "constant.numeric.decimal.suffix.float32.eco"
+                        }
+                    }
+                },
+                {
+					"match": "0[xX][0-9a-fA-F]+(?:_[0-9a-fA-F]+)*",
+					"name": "constant.numeric.hex.eco"
+				},
+				{
+					"match": "0[bB][01]+(?:_[01]+)*",
+					"name": "constant.numeric.binary.eco"
+				},
+                {
+                    "name": "constant.language.eco",
+                    "match": "\\b(true|false|null)\\b"
+                }
+			]
+		},
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.eco",
+                    "match": "//.*"
+                },
+                {
+                    "name": "comment.block.eco",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                }
+            ]
+        }
+	}
+}
