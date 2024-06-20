@@ -1,8 +1,14 @@
 {
-    "name": "echolang-vscode",
+    "name": "echolang",
     "displayName": "Echo Lang",
     "description": "The Echo programming language support for Visual Studio Code",
+    "icon": "resources/logo_echo.png",
     "version": "0.0.1",
+    "publisher": "mario-deluna",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/echolang/echolang-vscode"
+    },
     "engines": {
         "vscode": "^1.90.0"
     },
