@@ -9,6 +9,9 @@
 		{
 			"include": "#keywords"
 		},
+        {
+            "include": "#namespaces"
+        },
 		{
 			"include": "#types"
 		},
@@ -20,6 +23,13 @@
 		},
 		{
 			"include": "#constants"
+		},
+        {
+            "include": "#support"
+        },
+        {
+			"match": ";",
+			"name": "punctuation.terminator.expression.php"
 		}
 	],
 	"repository": {
@@ -27,7 +37,7 @@
 			"patterns": [
                 {
                     "name": "keyword.control.eco",
-                    "match": "\\b(echo|if|while|for|return)\\b"
+                    "match": "\\b(if|else|while|for|return)\\b"
                 },
                 {
 					"name": "keyword.operator.arithmetic.eco",
@@ -39,8 +49,16 @@
             "patterns": [
                 {
                     "name": "storage.type.eco",
-                    "match": "\\b(bool|float|double|float(32|64)|u?int(8|16|32|64|128)?)\\b"
-                }   
+                    "match": "\\b(void|bool|float|double|float(32|64)|u?int(8|16|32|64|128)?)\\b"
+                },
+                {
+                    "name": "storage.type.complex.eco",
+                    "match": "\\b(function|class|struct|extern|operator|constructor|destructor)\\b"
+                },
+                {
+                    "name": "storage.modifier.eco",
+                    "match": "\\b(const|public|private|protected|static|as)\\b"
+                }
             ]
         },
 		"strings": {
@@ -100,6 +118,30 @@
                     "name": "comment.block.eco",
                     "begin": "/\\*",
                     "end": "\\*/"
+                }
+            ]
+        },
+        "support": {
+            "patterns": [
+                {
+                    "name": "support.function.std.eco",
+                    "match": "\\b(echo|debug|fatal|ptr)\\b"
+                }
+            ]
+        },
+        "namespaces": {
+            "patterns": [
+                {
+                    "name": "entity.name.namespace.eco",
+                    "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=::)"
+                },
+                {
+                    "name": "punctuation.separator.namespace.eco",
+                    "match": "::"
+                },
+                {
+                    "name": "entity.name.symbol.eco",
+                    "match": "(?<=::)\\b[A-Za-z_][A-Za-z0-9_]*\\b"
                 }
             ]
         }
