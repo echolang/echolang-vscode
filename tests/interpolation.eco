@@ -1,0 +1,96 @@
+// SYNTAX TEST "source.echo" "string interpolation, format specs and escape sequences"
+
+// A '"' string interpolates. This is the one place the two quote characters differ.
+echo "{$name} is {$age} years old.";
+//    ^ punctuation.definition.interpolation.begin.eco
+//     ^^^^^ variable.other.eco
+//          ^ punctuation.definition.interpolation.end.eco
+//            ^^ string.quoted.double.eco
+//               ^ punctuation.definition.interpolation.begin.eco
+//                ^^^^ variable.other.eco
+
+// A "'" string is verbatim: '{$name}' stays '{$name}'.
+echo '{$name} does not';
+//    ^^^^^^^ string.quoted.single.eco
+//    ^^^^^^^ -meta.interpolation.eco
+
+// A hole holds an expression, not just a name, and it is lexed as ordinary Echo.
+echo "sum {$p->x + $p->y}";
+//         ^^ variable.other.eco
+//           ^^ keyword.operator.accessor.eco
+//             ^ variable.other.property.eco
+//               ^ keyword.operator.arithmetic.eco
+echo "index {$xs[1]}";
+//              ^ punctuation.section.brackets.eco
+//               ^ constant.numeric.integer.eco
+echo "chained {$name->sub(0, 2)->size()}";
+//                    ^^^ entity.name.function.member.eco
+//                               ^^^^ entity.name.function.member.eco
+echo "quoted {$name->equals('Ronon')}";
+//                           ^^^^^ string.quoted.single.eco
+
+// Format specs: [align][width][.precision][type], taken raw to the '}'.
+echo "|{$n:>8}|";
+//        ^ punctuation.separator.format-spec.eco
+//         ^^ constant.other.format-spec.eco
+echo "|{$n:<8}| |{$n:^8}|";
+//         ^^ constant.other.format-spec.eco
+//                   ^^ constant.other.format-spec.eco
+echo "{$n:x} {$n:X} {$n:b} {$n:o}";
+//        ^ constant.other.format-spec.eco
+echo "{$pi:.2f} and {$pi:.3e}";
+//         ^^^ constant.other.format-spec.eco
+//                       ^^^ constant.other.format-spec.eco
+
+// '::' and ':$' are their own tokens and neither opens a spec.
+echo "{$std::io::stdout->fd}";
+//     ^^^^ variable.other.eco
+//         ^^ punctuation.separator.namespace.eco
+//         ^^ -punctuation.separator.format-spec.eco
+//           ^^ entity.name.namespace.eco
+//               ^^^^^^ entity.name.symbol.eco
+echo "{$p:$}";
+//       ^^ keyword.operator.pointer-of.eco
+//       ^^ -punctuation.separator.format-spec.eco
+
+// A hole opens on '{$' and on nothing else, so a lone brace needs no escape.
+echo "a { brace and a } brace";
+//      ^ string.quoted.double.eco
+//      ^ -punctuation.definition.interpolation.begin.eco
+//        ^^^^^ string.quoted.double.eco
+
+// And for the case that is left there is '\{'.
+echo "not a hole: \{$name}";
+//                ^^ constant.character.escape.eco
+//                  ^^^^^ string.quoted.double.eco
+//                  ^^^^^ -variable.other.eco
+
+// The closed escape set.
+echo "tab:\there newline:\n cr:\r nul:\0 quote:\" slash:\\";
+//        ^^ constant.character.escape.eco
+//                       ^^ constant.character.escape.eco
+//                             ^^ constant.character.escape.eco
+//                                    ^^ constant.character.escape.eco
+echo "\x41 and \u{1F600}";
+//    ^^^^ constant.character.escape.eco
+//             ^^^^^^^^^ constant.character.escape.eco
+
+// There is no '\a', '\b', '\f' or '\v', and no unbraced '\uXXXX'.
+echo "\a \v \u0041";
+//    ^^ invalid.illegal.unknown-escape.eco
+//       ^^ invalid.illegal.unknown-escape.eco
+//          ^^ invalid.illegal.unknown-escape.eco
+
+// Escapes are decoded in a verbatim string too, they just do not open holes.
+echo 'tab:\there';
+//        ^^ constant.character.escape.eco
+
+// An unterminated hole or string is bounded to the line it opened on, so a string being typed does
+// not recolour every line below it. The next line must come back clean.
+echo "unclosed brace {$x";
+//                   ^ punctuation.definition.interpolation.begin.eco
+$recovered = $obj?->maybe;
+// <---------- variable.other.eco
+// <---------- -string.quoted.double.eco
+//               ^^^ keyword.operator.accessor.optional.eco
+//                  ^^^^^ variable.other.property.eco

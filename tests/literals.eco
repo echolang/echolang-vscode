@@ -1,0 +1,75 @@
+// SYNTAX TEST "source.echo" "numeric literals, including the forms fixed in 0.4.0"
+
+// Binary literals are a feature now. LexerFunction::BinaryLiteral, src/Lexer.cpp.
+$a = 0b1011;
+//   ^^^^^^ constant.numeric.binary.eco
+//   ^^^^^^ -invalid.illegal.numeric.binary.eco
+$b = 0B01;
+//   ^^^^ constant.numeric.binary.eco
+
+// '0b' with no digit declines in the lexer, so what reaches the parser is 0 and an identifier.
+$c = 0b;
+//   ^^ invalid.illegal.numeric.binary.eco
+
+// Echo has no digit separators, so the literal stops at the underscore.
+$d = 0b1011_0000;
+//   ^^^^^^ constant.numeric.binary.eco
+//         ^^^^^ -constant.numeric.binary.eco
+$e2 = 0xFF_00;
+//    ^^^^ constant.numeric.hex.eco
+
+// Hex takes an unsigned type sized to the digit count.
+$e = 0xFF;
+//   ^^^^ constant.numeric.hex.eco
+$f = 0X00FF;
+//   ^^^^^^ constant.numeric.hex.eco
+
+// Floats, including the trailing-dot form the reader gives an implicit zero.
+$g = 3.14;
+//   ^^^^ constant.numeric.float.eco
+$h = 3.14f;
+//   ^^^^^ constant.numeric.float.eco
+//       ^ storage.type.number.float32.eco
+$i = 1.;
+//   ^^ constant.numeric.float.eco
+$j = 1.f;
+//   ^^^ constant.numeric.float.eco
+
+// A dot followed by another dot is not a decimal point - this is what '0..3' rests on.
+foreach (0..3 as $k) { echo $k; }
+//       ^ constant.numeric.integer.eco
+//       ^ -constant.numeric.float.eco
+//        ^^ keyword.operator.range.eco
+//          ^ constant.numeric.integer.eco
+foreach (0 .. 3 as $k) { echo $k; }
+//         ^^ keyword.operator.range.eco
+foreach (0 ..= 3 as $k) { echo $k; }
+//         ^^^ keyword.operator.range.eco
+
+// 'f' is the only suffix and it is only legal on a float, so '3f' is an integer and an identifier.
+$l = 3f;
+//   ^ constant.numeric.integer.eco
+//   ^ -constant.numeric.float.eco
+
+// A declared suffix operator: 'operator (uint64 $a)kg : Naquadah'.
+$m = 1kg;
+//   ^ constant.numeric.integer.eco
+
+// Integers, booleans and null.
+$n = 25;
+//   ^^ constant.numeric.integer.eco
+$o = true;
+//   ^^^^ constant.language.boolean.eco
+$p = false;
+//   ^^^^^ constant.language.boolean.eco
+$q = null;
+//   ^^^^ constant.language.null.eco
+
+// A constant has no '$'. That missing dollar is the whole difference from a const variable.
+const usize MAX = 100;
+// <----- storage.modifier.eco
+//    ^^^^^ support.type.primitive.eco
+//          ^^^ variable.other.constant.eco
+const usize $max = 100;
+//          ^^^^ variable.other.eco
+//          ^^^^ -variable.other.constant.eco

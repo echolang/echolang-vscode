@@ -1,63 +1,698 @@
 /**
- * Native types
- * 
- * ----------------------------------------------------------------------------
- */
-// boolean
-bool $trufie = true;
-bool $falsie = false;
-
-// integer
-int $int;
-uint $uint;
-
-// sized integers
-int8 $int8;
-uint8 $uint8;
-int16 $int16;
-uint16 $uint16;
-int32 $int32;
-uint32 $uint32;
-int64 $int64;
-uint64 $uint64;
-int128 $int128;
-uint128 $uint128;
-
-// floats 
-float $float;
-double $double;
-float32 $float;
-float64 $double;
-
-/**
- * Numeric literals
- * 
+ * A highlighting fixture for the Echo grammar.
+ *
+ * Every construct below is drawn from echo/docs/ so this file can be checked against the specification
+ * rather than against somebody's memory. It is not meant to compile as one program - it is meant to make
+ * every rule in syntaxes/eco.tmLanguage.json fire at least once.
+ *
+ * To check a token: put the cursor on it and run "Developer: Inspect Editor Tokens and Scopes".
+ *
  * ----------------------------------------------------------------------------
  */
 
-// int
-$foo = 23;
-$bar = 999999999;
-
-// float
-$double = 23.0;
-$float = 3.14159f;
-
-// binary
-$bin = 0b1010;
-
-// hex
-$hex = 0x1A;
-$hex = 0X1A;
+/* A plain block comment. */
+// A line comment.
 
 /**
- * Arithmetic operators
- * 
+ * Primitives
+ *
+ * Fourteen of them, and exactly three aliases. There is no `double` and nothing wider than 64 bits.
+ * ----------------------------------------------------------------------------
+ */
+int8 $i8;
+int16 $i16;
+int32 $i32;
+int64 $i64;
+uint8 $u8;
+uint16 $u16;
+uint32 $u32;
+uint64 $u64;
+usize $index;
+isize $offset;
+float32 $f32;
+float64 $f64;
+bool $ready = true;
+
+// The three aliases, and only three. `int` is int32 on every platform.
+int $a = 1;
+uint $b = 2;
+float $c = 3.0f;
+
+// `void` is only ever a return type.
+function nothing() : void { }
+
+/**
+ * Literals
+ *
+ * ----------------------------------------------------------------------------
+ */
+$int = 25;              // int32
+$float = 0.5;           // float64
+$single = 0.5f;         // float32, and that is the f talking
+$hex = 0xFF;            // uint8, sized to the digit count
+$hex_upper = 0X00FF;    // uint16, despite being the same number
+$bin = 0b1011;          // uint8, sized the same way
+$bin_upper = 0B01;
+$yes = true;
+$no = false;
+$absent = null;
+
+// The trailing dot is a legal float - the reader appends the zero itself.
+$whole = 1.;
+$whole_32 = 1.f;
+
+// `f` is the only suffix in the language and it is only legal on a float, so this is the integer 3
+// followed by an identifier. The same shape is how a declared suffix operator reads: `1kg` is the
+// integer 1 and then `operator (uint64 $a)kg`.
+$not_a_float = 3f;
+$mass = 1kg;
+
+// There are no digit separators, so each of these stops at the underscore and an identifier follows.
+$no_separators = 0b1011_0000;
+$nor_here = 0xFF_00;
+
+// `0b` with no digit declines in the lexer, which leaves the integer 0 and an identifier `b`.
+$broken = 0b;
+
+/**
+ * Strings, interpolation and escapes
+ *
+ * The two quote characters mean different things, and this is the only place in Echo where they do.
+ * ----------------------------------------------------------------------------
+ */
+$text = "double quoted, which interpolates";
+$other = 'single quoted, which is verbatim';
+
+$name = 'Ronon';
+$age = 3;
+
+echo "{$name} is {$age} years old.";
+echo '{$name} does not interpolate';
+
+// A hole holds an expression, not just a name - and it is lexed as ordinary Echo.
+echo "sum {$p->x + $p->y}";
+echo "index {$xs[1]}";
+echo "chained {$name->sub(0, 2)->size()}";
+echo "quoted {$name->equals('Ronon')}";
+
+// Format specs: `[align][width][.precision][type]`, taken raw to the closing brace.
+echo "|{$n:>8}| |{$n:<8}| |{$n:^8}|";
+echo "{$n:d} {$n:x} {$n:X} {$n:b} {$n:o}";
+echo "{$pi:.2f} and {$pi:.3e}";
+
+// `::` and `:$` are their own tokens, and neither one opens a format spec.
+echo "{$std::io::stdout->fd}";
+echo "{$p:$}";
+
+// A hole opens on `{$` and on nothing else, so a lone brace is text and needs no escape.
+echo "a { brace and a } brace";
+
+// And for the case that is left, there is `\{`.
+echo "not a hole: \{$name}";
+
+// The escape set is closed: \n \t \r \0, a backslash or either quote, \xNN with exactly two hex
+// digits, and \u{...} with one to six and the braces required.
+echo "tab:\there newline:\n cr:\r nul:\0 quote:\" slash:\\";
+echo "\x41 is an A, and \u{1F600} is an emoji";
+
+// There is no \a, \b, \f or \v, and no unbraced \uXXXX. Anything else is an error, not a passthrough.
+echo "\a \v A";
+
+// A string or a hole left open is bounded to its own line, so the lines below it stay readable while
+// the one above is still being typed. Everything from here on must come back clean.
+echo "unclosed brace {$x";
+$recovered = $obj?->maybe;
+$also_fine = "back to normal";
+
+/**
+ * Operators
+ *
  * ----------------------------------------------------------------------------
  */
 echo 1 + 1;
-echo 2 - 1;
+echo 2 - 1;             // a binary minus needs its spaces: `1-2` is two literals in a row
 echo 2 * 2;
 echo 4 / 2;
 echo 5 % 2;
-echo 2 ** 3; 
+echo 2 ** 3;
+echo $i32 << 2;
+echo $i32 >> 1;
+echo $a == $b;
+echo $a != $b;
+echo $a <= $b;
+echo $a >= $b;
+echo $ready && !$no;
+echo $ready || $no;
+echo $u32 ^ $u8;
+echo $u32 | $u8;
+
+// `&` glued to what follows is a reference. `&` with a space after it is bitwise and. A digit counts,
+// which is why a binary `&` wants spaces around it.
+echo $u32 & $u8;
+$borrowed = &$i32;
+
+/**
+ * Nullability
+ *
+ * There is no ternary operator - `?` is the nullable suffix and nothing else.
+ * ----------------------------------------------------------------------------
+ */
+int32? $maybe = null;
+echo $maybe ?? 0;
+echo $object?->name;
+
+guard int32 $value = $maybe else { return; }
+
+/**
+ * Control flow
+ *
+ * ----------------------------------------------------------------------------
+ */
+if ($a > 0) {
+    echo "positive";
+} else {
+    echo "not";
+}
+
+while ($a < 10) {
+    $a++;
+}
+
+for ($i = 0; $i < 10; $i++) {
+    if ($i == 5) { continue; }
+    if ($i == 8) { break; }
+}
+
+// `..` is exclusive and `..=` includes its upper bound. Neither is a token - both are operator
+// declarations in stdlib/core/range.eco, which is why `0 .. 3` is an integer, two dots and an integer.
+foreach (0 .. 3 as $i) { echo $i; }
+foreach (1 ..= 5 as $n) { echo $n; }
+foreach ($map as $key => $val) { echo $key; }
+
+// `const if` is decided before the program runs, and the arm not taken is discarded.
+const if (mem::is_trivially_copyable<int32>()) {
+    echo "trivial";
+}
+
+/**
+ * Constants
+ *
+ * No `$`, and that missing dollar is the entire difference between a constant and a const variable.
+ * ----------------------------------------------------------------------------
+ */
+const usize MAX = 100;
+const GREETING = "hello";
+const HALF = MAX / 2;
+const usize $max = 100;     // a const variable: has storage, lives in a scope
+
+/**
+ * Functions
+ *
+ * A named function always states its return type. `: void` is not optional.
+ * ----------------------------------------------------------------------------
+ */
+function add(int32 $a, int32 $b) : int32
+{
+    return $a + $b;
+}
+
+private function hidden() : void { }
+internal function moduleWide() : void { }
+public function everybody() : void { }
+
+#[inline]
+function double(int32 $n) : int32
+{
+    return $n * 2;
+}
+
+/**
+ * Closures
+ *
+ * `function<R(P...)>` is the type of a callable value.
+ * ----------------------------------------------------------------------------
+ */
+function<int32(int32)> $increment = function(int32 $a) : int32 { return $a + 1; };
+function<int32(int32, int32)> $binary = function(int32 $a, int32 $b) : int32 { return $a + $b; };
+function<void()> $noop = function() { };
+
+function adder(int32 $seed) : function<int32(int32)>
+{
+    return function(int32 $x) : int32 { return $x + $seed; };
+}
+
+/**
+ * Structs are values
+ *
+ * There is no `new`. You call the type.
+ * ----------------------------------------------------------------------------
+ */
+struct GateAddress
+{
+    int32 $destination;
+    int32 $origin;
+
+    // `constructor` is a contextual identifier rather than a reserved word, which is why a struct may
+    // have a property called `constructor` and nothing breaks. `destructor` is genuinely reserved.
+    constructor(int32 $destination, int32 $origin)
+    {
+        $this->destination = $destination;
+        $this->origin = $origin;
+    }
+
+    destructor() { }
+
+    const function is_valid() : bool
+    {
+        return $this->destination > 0;
+    }
+}
+
+GateAddress $dialled = GateAddress(27, 1);
+GateAddress $backup = $dialled;     // a copy, not a second name
+echo $dialled->destination;
+
+#[unique]
+struct Handle
+{
+    private int32 $fd;
+}
+
+struct Feet
+{
+    float64 $value;
+
+    #[implicit]
+    const function to_meters() : Meters
+    {
+        return Meters($this->value * 0.3048);
+    }
+}
+
+/**
+ * Classes are references
+ *
+ * Same declaration syntax, opposite semantics, one keyword apart.
+ * ----------------------------------------------------------------------------
+ */
+class Stargate
+{
+    int32 $chevrons_locked;
+}
+
+Stargate $sgc = Stargate(0);
+Stargate $embarkation_room = $sgc;      // both names, one gate
+
+weak<Stargate> $watcher = $sgc;
+guard Stargate $stillThere = strong($watcher) else { die("gate is gone"); }
+
+echo $enemy instanceof Hatak;
+
+/**
+ * Interfaces
+ *
+ * ----------------------------------------------------------------------------
+ */
+interface Stepper<V>
+{
+    type Iter : Stepper<V>;
+
+    function step() : V?;
+    function done() : bool;
+}
+
+/**
+ * Generics
+ *
+ * Echo monomorphizes: each set of type arguments produces its own copy.
+ * ----------------------------------------------------------------------------
+ */
+function largest<T : numeric>(T $a, T $b) : T
+{
+    if ($a > $b) { return $a; }
+    return $b;
+}
+
+function halve<T : integer>(T $value) : T { return $value / 2; }
+function scale<T : floating>(T $value) : T { return $value * 2.0; }
+function widen<T : signed, U : unsigned>(T $a, U $b) : T { return $a; }
+
+/**
+ * Operator declarations
+ *
+ * Infix, prefix, postfix and `[]`, with an optional precedence and associativity clause.
+ * ----------------------------------------------------------------------------
+ */
+operator (GateAddress $a) + (GateAddress $b) : GateAddress
+{
+    return GateAddress($a->destination + $b->destination, $a->origin);
+}
+
+operator(35, left) (int32 $a) tight (int32 $b) : int32 { return $a + $b; }
+operator(45, right) (int32 $a) rassoc (int32 $b) : int32 { return $a - $b; }
+
+operator !!(Stargate $s) : bool { return $s->chevrons_locked == 7; }
+operator (uint64 $a)kg : GateAddress { return GateAddress($a, 0); }
+
+operator<T> (array<T>& $a)[usize $index] : T&
+{
+    return $a->get($index);
+}
+
+/**
+ * Library types
+ *
+ * None of these are compiler types. They are structs in stdlib/core/, written in Echo.
+ * ----------------------------------------------------------------------------
+ */
+string $name = "Echo";
+array<int32> $numbers = [1, 2, 3];
+map<string, int32> $counts;
+slice<const int32> $window;
+range<int32> $span = 0 .. 10;
+
+$numbers[] = 4;
+usize $count = $numbers->count();
+echo mem::size_of<int32>();
+echo mem::align_of<usize>();
+assert(1 + 1 == 2);
+dprint($numbers);
+exit(0);
+
+/**
+ * Memory
+ *
+ * ----------------------------------------------------------------------------
+ */
+ptr<uint8> $raw;
+ptr<const uint8> $readonly;
+
+// `:$` names the pointer itself rather than what it points at, and it is one token.
+$raw:$ = &$other_raw;
+echo $raw:$ == &$raw;
+echo $outer:$:$ == &$outer;
+
+unsafe {
+    echo "raw storage may be promoted to a typed borrow here";
+}
+
+function consume(mv array<int32> $owned) : void { }
+consume(mv $numbers);
+
+/**
+ * Namespaces
+ *
+ * `namespace` is a statement, not a block.
+ * ----------------------------------------------------------------------------
+ */
+namespace app;
+
+echo contract::iterable;
+echo self::MAX;
+
+/**
+ * C interop
+ *
+ * A binding is a declaration. The name goes to the linker, and nothing checks it against a header.
+ * ----------------------------------------------------------------------------
+ */
+extern {
+    function abs as c_abs(int32 $value) : int32;
+    function malloc as raw_alloc(usize $bytes) : ptr<uint8>;
+    function strlen as measure(ptr<const uint8> $s) : usize;
+    function sqrt(float64 $x) : float64;
+}
+
+/**
+ * Library attributes
+ *
+ * Documented so that reading stdlib/ makes sense, not so you write them.
+ * ----------------------------------------------------------------------------
+ */
+#[core: array]
+public struct array<T> : contract::iterable<T>, contract::const_iterable<const T>
+{
+    mem::buffer<T> $storage;
+    usize $len;
+}
+
+#[builtin: size_of]
+function size_of<T>() : usize;
+
+#[intrinsic: "llvm.sin"]
+function sin(float64 $x) : float64;
+
+// The vocabulary of attribute names is closed, so a typo is a compile error rather than a decoration
+// nobody reads. This one should be flagged.
+#[bultin: "size_of"]
+function mistyped<T>() : usize;
+
+/**
+ * Manifest attributes
+ *
+ * These are legal in a module.eco and nowhere useful else. Placement is not validated in this direction,
+ * which is why writing one here parses and is read by absolutely nothing.
+ * ----------------------------------------------------------------------------
+ */
+#[module: "stdlib"]
+#[version: "0.1.0"]
+#[sources: "core/*.eco"]
+#[sources: ["src/*.eco", "extra/*.eco"]]
+#[depends: path "../vendor/glad"]
+#[depends: git { url: "https://example.com/x.git", rev: "v1.2.0" }]
+#[link: lib "GL"]
+#[link: framework "OpenGL"]
+#[link: search "/usr/local/lib"]
+#[cc: sources "c/*.c"]
+#[cc: include "c/include"]
+#[cc: define { ECO_SHIM_BASE: 40, GLAD_GL_IMPLEMENTATION: 1, DEBUG: true }]
+#[cc: flag "-Wall"]
+#[build_dir: "target"]
+
+// `target` is the only attribute that may carry a `{ }` scope, and what is inside the braces applies
+// to that target alone.
+#[target: exe { name: "clock", entry: "src/main.eco" }]
+#[target: test]
+{
+    #[sources: "tests/*.eco"]
+}
+
+/**
+ * Conditional compilation
+ *
+ * Not attributes: a token filter consumes these between lexing and the first parse pass, which is what
+ * lets them work at file scope, inside a body, or around a namespace. They fold as regions.
+ * ----------------------------------------------------------------------------
+ */
+#[if: os == darwin]
+    function platform() : void { echo "mac"; }
+#[elif: os == linux && arch == x86_64]
+    function platform() : void { echo "linux on intel"; }
+#[elif: arch == arm64]
+    function platform() : void { echo "some arm"; }
+#[else]
+    function platform() : void { echo "windows, probably"; }
+#[end]
+
+#[if: TRACE && !QUIET]
+    echo "a bare name is a --define flag, and it is false when undefined";
+#[end]
+
+/**
+ * Enums
+ *
+ * A type with a fixed list of values. A case is a static function on the enum, which is why building
+ * one is a call and why the leading-dot shorthand works at all.
+ * ----------------------------------------------------------------------------
+ */
+enum DistanceUnit
+{
+    case meter;
+    case kilometer;
+    case mile;
+}
+
+// The name is claimed by the keyword in front of it, never by casing - stdlib writes them lowercase.
+public enum outcome
+{
+    case ok;
+    case error;
+}
+
+// A backing. An integer one IS the discriminant; a string one numbers its cases from zero and
+// recovers the spelling through the synthesized `value()`.
+enum Status : int32
+{
+    case ok = 200;
+    case not_found = 404;
+}
+
+enum Unit : string
+{
+    case meter = "m";
+    case mile = "mi";
+}
+
+// A payload list takes the same grammar as a function's parameter list. Payload and backing value
+// are mutually exclusive, and empty parentheses are legal.
+enum CurlError
+{
+    case cannot_resolve_host;
+    case timeout(int32 $after_seconds);
+    case http(int32 $code, string $body);
+    case blank();
+}
+
+// A generic enum carries its parameters across an instantiation.
+enum Slot<T>
+{
+    case empty;
+    case filled(T $value);
+}
+
+// An enum body holds cases, methods, statics and operators. No properties, no constructors, no
+// constants and no nested types.
+enum Side
+{
+    case left;
+    case right;
+
+    static int32 $flips = 0;
+
+    const function is_left() : bool
+    {
+        return $this == Side::left;
+    }
+
+    static function both() : int32 { return 2; }
+}
+
+$unit_a = DistanceUnit::meter;          // no parentheses when the case takes nothing
+$unit_b = CurlError::timeout(30);
+echo Status::not_found->value();        // 404
+echo Unit::meter->value();              // m
+
+// The leading dot, in all three destinations the shorthand accepts: a declared variable, a chosen
+// call's parameter, and a return type.
+DistanceUnit $unit = .kilometer;
+echo describe(.meter);
+
+function parse_one(int32 $n) : outcome
+{
+    return .ok($n);
+}
+
+Slot<string> $slot = .filled("hi");
+echo Slot<int32>::filled(9);
+
+/**
+ * match
+ *
+ * The only pattern-matching construct in the language. There is no `switch`, `else` is the catch-all
+ * rather than `default`, and a pattern's parentheses hold bindings only - never literals and never a
+ * nested pattern.
+ * ----------------------------------------------------------------------------
+ */
+function to_metres(Unit $u) : int32
+{
+    return match ($u) {
+        Unit::meter($v)     => $v,
+        Unit::kilometer($v) => $v * 1000,
+        Unit::mile($v)      => $v * 1609,
+    };
+}
+
+// The leading-dot spelling of the same arms, and a generic subject spelled out in full.
+function is_ok(outcome $r) : bool
+{
+    return match ($r) {
+        .ok($v)    => true,
+        .error($e) => false,
+    };
+}
+
+function unwrap_or(Slot<int32> $s, int32 $fallback) : int32
+{
+    return match ($s) {
+        Slot<int32>::empty      => $fallback,
+        Slot<int32>::filled($v) => $v,
+    };
+}
+
+// `else` is the catch-all, and it is the same keyword `if` uses.
+$waited = match ($err) {
+    CurlError::timeout($after) => $after,
+    else                       => 0,
+};
+
+// Block arms are a statement, so they take no trailing semicolon and the comma between them is
+// optional. Arms are values or blocks, never both in one match.
+match ($e)
+{
+    E::none        => { echo "none"; }
+    E::one($v)     => { echo "one"; echo $v; }
+    E::two($a, $b) => { echo $a; echo $b; }
+}
+
+// An arm that never comes back contributes no type to the arms' unification.
+function pick(E $e) : int32
+{
+    return match ($e) {
+        E::one($v) => $v,
+        E::none    => die('no value in this one'),
+    };
+}
+
+/**
+ * Statics
+ *
+ * A `static function` is a function its type owns and that takes no receiver. A static property is
+ * initialized lazily, the first time anything names it.
+ * ----------------------------------------------------------------------------
+ */
+struct Session
+{
+    static int32 $count = 0;
+    static string $label = 'first';
+
+    static function first() : Session { return Session(); }
+}
+
+echo Session::first();
+
+/**
+ * Tests
+ *
+ * File scope only, and a test takes no visibility modifier. `echoc test` compiles the module and
+ * runs no program of it.
+ * ----------------------------------------------------------------------------
+ */
+test adds_up
+{
+    $a = 22;
+    $b = 20;
+    assert($a + $b == 42);
+}
+
+#[group: "arithmetic"]
+test in_the_group
+{
+    assert(1 + 1 == 2);
+}
+
+/**
+ * Words that look reserved and are not
+ *
+ * Matching is whole-word, so none of these collide with the keyword they start with.
+ * ----------------------------------------------------------------------------
+ */
+$forward = 1;
+$classify = 2;
+$enumerate = 3;
+$matcher = 4;
+$statically = 5;
+$testing = 6;
+$cases = 7;
+$nullable = 4;
+$constructor = 5;
+echo $record->type;

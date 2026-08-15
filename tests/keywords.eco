@@ -1,0 +1,115 @@
+// SYNTAX TEST "source.echo" "the thirty-five reserved words, plus what is only contextual"
+
+// 'static' became a real reserved word in the compiler's 14d8455.
+struct Point
+{
+    static int32 $made = 0;
+//  ^^^^^^ storage.modifier.eco
+    static function origin() : Point { return Point(0, 0); }
+//  ^^^^^^ storage.modifier.eco
+//         ^^^^^^^^ storage.type.function.eco
+//                  ^^^^^^ entity.name.function.eco
+}
+echo Point::origin();
+//   ^^^^^ entity.name.type.eco
+//          ^^^^^^ entity.name.function.call.eco
+
+// A test declaration. File scope only, and it takes no visibility modifier.
+test adds_up
+// <---- keyword.other.test.eco
+//   ^^^^^^^ entity.name.function.test.eco
+{
+    assert(1 + 1 == 2);
+//  ^^^^^^ support.function.builtin.eco
+}
+
+// Visibility. Leaving the modifier off is 'internal', not public.
+public function a() : void { }
+// <------ storage.modifier.eco
+//                    ^^^^ support.type.primitive.eco
+private function b() : void { }
+// <------- storage.modifier.eco
+internal function c() : void { }
+// <-------- storage.modifier.eco
+
+// Control flow.
+function d(int32 $n) : int32
+{
+    if ($n > 0) { return 1; } else { return 0; }
+//  ^^ keyword.control.conditional.eco
+//                            ^^^^ keyword.control.conditional.eco
+    while (true) { break; }
+//  ^^^^^ keyword.control.loop.eco
+//                 ^^^^^ keyword.control.loop.eco
+    for ($i = 0; $i < 3; $i = $i + 1) { continue; }
+//  ^^^ keyword.control.loop.eco
+//                                      ^^^^^^^^ keyword.control.loop.eco
+    foreach ($xs as $k => $v) { echo $v; }
+//  ^^^^^^^ keyword.control.loop.eco
+//               ^^ keyword.control.as.eco
+//                     ^^ keyword.operator.key-value.eco
+    unsafe { }
+//  ^^^^^^ keyword.control.unsafe.eco
+    return 0;
+//  ^^^^^^ keyword.control.flow.eco
+}
+
+// Word operators and the memory keywords.
+$a = mv $b;
+//   ^^ keyword.operator.word.eco
+$c = strong($weak);
+//   ^^^^^^ keyword.operator.word.eco
+$d = $x instanceof Vessel;
+//      ^^^^^^^^^^ keyword.operator.word.eco
+//                 ^^^^^^ entity.name.type.eco
+ptr<uint8> $p = null;
+// <--- support.type.eco
+//  ^^^^^ support.type.primitive.eco
+weak<Stargate> $w = null;
+// <---- support.type.eco
+
+// Declarations.
+namespace app::geometry;
+// <--------- keyword.other.namespace.eco
+//        ^^^^^^^^^^^^^ entity.name.namespace.eco
+extern { function abs as c_abs(int32 $value) : int32; }
+// <------ keyword.other.extern.eco
+//                ^^^ entity.name.function.eco
+//                    ^^ keyword.control.as.eco
+//                       ^^^^^ entity.name.function.eco
+operator(35, left) (int32 $a) tight (int32 $b) : int32 { return $a + $b; }
+// <-------- storage.type.function.operator.eco
+//       ^^ constant.numeric.integer.eco
+//           ^^^^ keyword.other.associativity.eco
+interface Vessel { function speed() : int32; }
+// <--------- storage.type.class.eco
+//        ^^^^^^ entity.name.type.eco
+
+// These are NOT reserved. The lexer matches whole words, so they stay ordinary identifiers.
+$forward = 1; $classify = 2; $enumerate = 3; $nullable = 4; $matcher = 5;
+// <-------- variable.other.eco
+// <-------- -keyword.control.flow.eco
+//            ^^^^^^^^^ variable.other.eco
+//                                                          ^^^^^^^^ variable.other.eco
+//                                                          ^^^^^^^^ -keyword.control.match.eco
+
+// 'constructor', 'type' and 'self' are contextual, not reserved.
+struct Chevron
+{
+    constructor(int32 $s) { $this->symbol = $s; }
+//  ^^^^^^^^^^^ storage.type.function.constructor.eco
+    destructor() { }
+//  ^^^^^^^^^^ storage.type.function.constructor.eco
+    const usize CAPACITY = 8;
+//              ^^^^^^^^ variable.other.constant.eco
+    function cap() : usize { return self::CAPACITY; }
+//                                  ^^^^ variable.language.self.eco
+//                                      ^^ punctuation.separator.namespace.eco
+}
+
+// Comments. There is no doc-comment form in the language, but stdlib writes '/** */' throughout.
+// <-- comment.line.double-slash.eco
+/** a doc block */
+// <--- comment.block.documentation.eco
+/* a plain block */
+// <-- comment.block.eco

@@ -1,30 +1,69 @@
 {
     "comments": {
-        // symbol used for single line comment. Remove this entry if your language does not support line comments
         "lineComment": "//",
-        // symbols used for start and end a block comment. Remove this entry if your language does not support block comments
         "blockComment": [ "/*", "*/" ]
     },
-    // symbols used as brackets
+
+    // Only the three real pairs. '<' and '>' are comparison operators as often as they are type-argument
+    // brackets, and listing them here would make bracket matching wrong on every '$a < $b'.
     "brackets": [
         ["{", "}"],
         ["[", "]"],
         ["(", ")"]
     ],
-    // symbols that are auto closed when typing
+
     "autoClosingPairs": [
-        ["{", "}"],
-        ["[", "]"],
-        ["(", ")"],
-        ["\"", "\""],
-        ["'", "'"]
+        { "open": "{", "close": "}" },
+        { "open": "[", "close": "]" },
+        { "open": "(", "close": ")" },
+        { "open": "\"", "close": "\"", "notIn": ["string", "comment"] },
+        { "open": "'", "close": "'", "notIn": ["string", "comment"] },
+        { "open": "/*", "close": " */", "notIn": ["string"] }
     ],
-    // symbols that can be used to surround a selection
+
     "surroundingPairs": [
         ["{", "}"],
         ["[", "]"],
         ["(", ")"],
         ["\"", "\""],
         ["'", "'"]
-    ]
+    ],
+
+    // A variable always carries its '$', so the '$' is part of the word: double-clicking '$count' should
+    // select the whole thing rather than leave the sigil behind.
+    "wordPattern": "\\$?[A-Za-z_][A-Za-z0-9_]*",
+
+    "indentationRules": {
+        "increaseIndentPattern": "^.*\\{[^}\"']*$",
+        "decreaseIndentPattern": "^\\s*\\}"
+    },
+
+    "onEnterRules": [
+        {
+            "beforeText": "^\\s*/\\*\\*(?!/)([^\\*]|\\*(?!/))*$",
+            "afterText": "^\\s*\\*/$",
+            "action": { "indent": "indentOutdent", "appendText": " * " }
+        },
+        {
+            "beforeText": "^\\s*/\\*\\*(?!/)([^\\*]|\\*(?!/))*$",
+            "action": { "indent": "none", "appendText": " * " }
+        },
+        {
+            "beforeText": "^(\\t|[ ])*[ ]\\*([ ]([^\\*]|\\*(?!/))*)?$",
+            "action": { "indent": "none", "appendText": "* " }
+        },
+        {
+            "beforeText": "^(\\t|[ ])*[ ]\\*/\\s*$",
+            "action": { "indent": "none", "removeText": 1 }
+        }
+    ],
+
+    // '#[if: ...]' / '#[end]' is a conditional-compilation region and folds like one. It is a token filter
+    // rather than a brace construct, so nothing else in the editor would know to collapse it.
+    "folding": {
+        "markers": {
+            "start": "^\\s*#\\[\\s*(if|elif|else)\\b.*\\]\\s*$",
+            "end": "^\\s*#\\[\\s*end\\s*\\]\\s*$"
+        }
+    }
 }

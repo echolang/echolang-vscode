@@ -1,0 +1,91 @@
+// SYNTAX TEST "source.echo" "match: the only pattern-matching construct in the language"
+
+// 'match' has to be a keyword rather than fall through to a call, exactly like 'if'.
+function to_metres(Unit $u) : int32
+{
+    return match ($u) {
+//         ^^^^^ keyword.control.match.eco
+//         ^^^^^ -entity.name.function.call.eco
+//               ^ punctuation.section.parens.eco
+//                ^^ variable.other.eco
+        Unit::meter($v)     => $v,
+//      ^^^^ entity.name.type.eco
+//          ^^ punctuation.separator.namespace.eco
+//                  ^^ variable.other.eco
+//                          ^^ keyword.operator.key-value.eco
+        Unit::kilometer($v) => $v * 1000,
+//                                ^ keyword.operator.arithmetic.eco
+//                                  ^^^^ constant.numeric.integer.eco
+        Unit::mile($v)      => $v * 1609,
+    };
+}
+
+// The leading-dot spelling of the same arms.
+function is_ok(result $r) : bool
+{
+    return match ($r) {
+        .ok($v)    => true,
+//      ^ punctuation.accessor.dot.eco
+//       ^^ variable.other.enummember.eco
+//                    ^^^^ constant.language.boolean.eco
+        .error($e) => false,
+//       ^^^^^ variable.other.enummember.eco
+//                    ^^^^^ constant.language.boolean.eco
+    };
+}
+
+// A generic subject spells its owner out in full.
+function unwrap_or(Slot<int32> $s, int32 $fallback) : int32
+{
+    return match ($s) {
+        Slot<int32>::empty      => $fallback,
+//      ^^^^ entity.name.type.eco
+//           ^^^^^ support.type.primitive.eco
+//                   ^^^^^ entity.name.symbol.eco
+        Slot<int32>::filled($v) => $v,
+//                   ^^^^^^ entity.name.function.call.eco
+    };
+}
+
+// 'else' is the catch-all. There is no 'default' - it is the same keyword 'if' uses.
+$waited = match ($err)
+{
+    CurlError::timeout($after) => $after,
+//                     ^^^^^^ variable.other.eco
+    else => 0,
+//  ^^^^ keyword.control.conditional.eco
+//          ^ constant.numeric.integer.eco
+};
+
+// Block arms. A statement, so no trailing semicolon - and the comma between them is optional.
+match ($e)
+// <----- keyword.control.match.eco
+{
+    E::none        => { echo "none"; }
+//                    ^ punctuation.section.braces.eco
+//                      ^^^^ keyword.other.echo.eco
+    E::one($v)     => { echo "one"; echo $v; }
+    E::two($a, $b) => { echo $a; echo $b; }
+//         ^^ variable.other.eco
+//           ^ punctuation.separator.comma.eco
+//             ^^ variable.other.eco
+}
+
+// An arm may diverge and contribute no type at all.
+function pick(E $e) : int32
+{
+    return match ($e) {
+        E::one($v) => $v,
+        E::none    => die('no value in this one'),
+//                    ^^^ support.function.builtin.eco
+//                            ^^^^^ string.quoted.single.eco
+    };
+}
+
+// 'guard' reads an enum through contract::unwrappable and contract::failable.
+$v = guard doubled($n) else { return -1; }
+//   ^^^^^ keyword.control.conditional.eco
+//         ^^^^^^^ entity.name.function.call.eco
+//                     ^^^^ keyword.control.conditional.eco
+$w = guard doubled($n) else ($why) { echo $why; return -2; }
+//                           ^^^^ variable.other.eco

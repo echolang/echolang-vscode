@@ -1,4 +1,8 @@
 {
+	"information_for_contributors": [
+		"Injects Echo highlighting into fenced code blocks in Markdown.",
+		"Both fence spellings are accepted because the language docs use both: ```echo and ```eco."
+	],
 	"fileTypes": [],
 	"injectionSelector": "L:text.html.markdown",
 	"patterns": [
@@ -8,9 +12,9 @@
 	],
 	"repository": {
 		"echo-code-block": {
-            "begin": "(^|\\G)(\\s*)(`{3,}|~{3,})\\s*(?i:(echo)(\\s+[^`~]*)?$)",
+			"begin": "(^|\\G)(\\s*)(`{3,}|~{3,})\\s*(?i:(echo|eco)(\\s+[^`~]*)?$)",
 			"name": "markup.fenced_code.block.markdown",
-            "end": "(^|\\G)(\\2|\\s{0,3})(\\3)\\s*$",
+			"end": "(^|\\G)(\\2|\\s{0,3})(\\3)\\s*$",
 			"beginCaptures": {
 				"3": {
 					"name": "punctuation.definition.markdown"
@@ -18,10 +22,7 @@
 				"4": {
 					"name": "fenced_code.block.language"
 				},
-				"7": {
-					"name": "punctuation.definition.markdown"
-				},
-				"8": {
+				"5": {
 					"name": "fenced_code.block.language.attributes"
 				}
 			},
@@ -32,8 +33,8 @@
 			},
 			"patterns": [
 				{
-                    "begin": "(^|\\G)(\\s*)(.*)",
-                    "while": "(^|\\G)(?!\\s*([`~]{3,})\\s*$)",
+					"begin": "(^|\\G)(\\s*)(.*)",
+					"while": "(^|\\G)(?!\\s*([`~]{3,})\\s*$)",
 					"contentName": "meta.embedded.block.echo",
 					"patterns": [
 						{

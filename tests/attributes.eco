@@ -1,0 +1,86 @@
+// SYNTAX TEST "source.echo" "attributes: the closed fifteen-name vocabulary"
+
+// The seven declaration attributes.
+#[inline]
+// <-- punctuation.definition.attribute.begin.eco
+// <~~------ entity.other.attribute-name.eco
+//      ^ punctuation.definition.attribute.end.eco
+#[implicit]
+// <~~-------- entity.other.attribute-name.eco
+#[unique]
+// <~~------ entity.other.attribute-name.eco
+#[core: array]
+// <~~---- entity.other.attribute-name.eco
+//      ^^^^^ constant.other.attribute-value.eco
+#[builtin: size_of]
+// <~~------- entity.other.attribute-name.eco
+#[intrinsic: "llvm.sin"]
+// <~~--------- entity.other.attribute-name.eco
+//            ^^^^^^^^ string.quoted.double.eco
+
+// 'group' reaches TestDeclParser and was missing from the vocabulary before 0.4.0.
+#[group: "arithmetic"]
+// <~~----- entity.other.attribute-name.eco
+// <~~----- -invalid.illegal.unknown-attribute.eco
+//        ^^^^^^^^^^ string.quoted.double.eco
+
+// The eight manifest attributes. A module.eco is Echo, read by the same parser.
+#[module: "plotter"]
+// <~~------ entity.other.attribute-name.eco
+#[version: "0.1.0"]
+// <~~------- entity.other.attribute-name.eco
+#[build_dir: "target"]
+// <~~--------- entity.other.attribute-name.eco
+#[sources: ["src/*.eco", "extra/*.eco"]]
+// <~~------- entity.other.attribute-name.eco
+//         ^ punctuation.section.attribute.list.begin.eco
+//                     ^ punctuation.separator.comma.eco
+#[depends: path "../geometry"]
+// <~~------- entity.other.attribute-name.eco
+//         ^^^^ entity.name.tag.eco
+#[depends: git { url: "https://example.test/x.git", rev: "v1.2.0" }]
+//         ^^^ entity.name.tag.eco
+//             ^ punctuation.section.attribute.record.begin.eco
+//               ^^^ support.type.property-name.eco
+//                                                  ^^^ support.type.property-name.eco
+#[link: framework "OpenGL"]
+// <~~---- entity.other.attribute-name.eco
+//      ^^^^^^^^^ entity.name.tag.eco
+#[link: lib ["GL", "GLU"]]
+//      ^^^ entity.name.tag.eco
+#[cc: define { ECO_SHIM_BASE: 40, GLAD_GL_IMPLEMENTATION: 1 }]
+// <~~-- entity.other.attribute-name.eco
+//    ^^^^^^ entity.name.tag.eco
+//                            ^^ constant.numeric.integer.eco
+
+// 'target' was missing too, and it is the only attribute that may carry a '{ }' scope.
+#[target: exe { name: "clock", entry: "src/main.eco" }]
+// <~~------ entity.other.attribute-name.eco
+// <~~------ -invalid.illegal.unknown-attribute.eco
+//        ^^^ entity.name.tag.eco
+//              ^^^^ support.type.property-name.eco
+#[target: test]
+// <~~------ entity.other.attribute-name.eco
+//        ^^^^ entity.name.tag.eco
+
+// An unknown name is a compile error and is scoped as one.
+#[bultin: "size_of"]
+// <~~------ invalid.illegal.unknown-attribute.eco
+
+// The conditional directives are not attributes - a token filter consumes them before parsing.
+#[if: os == darwin]
+// <-- punctuation.definition.directive.begin.eco
+// <~~-- keyword.control.directive.conditional.eco
+//    ^^ variable.language.axis.eco
+//       ^^ keyword.operator.logical.eco
+//          ^^^^^^ constant.language.platform.eco
+#[elif: arch == x86_64 && !QUIET]
+// <~~---- keyword.control.directive.conditional.eco
+//      ^^^^ variable.language.axis.eco
+//              ^^^^^^ constant.language.platform.eco
+//                     ^^ keyword.operator.logical.eco
+//                         ^^^^^ entity.name.constant.flag.eco
+#[else]
+// <~~---- keyword.control.directive.conditional.eco
+#[end]
+// <~~--- keyword.control.directive.conditional.eco

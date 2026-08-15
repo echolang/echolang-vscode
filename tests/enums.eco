@@ -1,0 +1,137 @@
+// SYNTAX TEST "source.echo" "enums: declarations, cases, backings, payloads, generics"
+
+// A plain enum. The name is claimed by the keyword in front of it, never by casing.
+enum DistanceUnit
+// <---- storage.type.class.eco
+//   ^^^^^^^^^^^^ entity.name.type.eco
+{
+    case meter;
+//  ^^^^ keyword.declaration.case.eco
+//       ^^^^^ variable.other.enummember.eco
+//            ^ punctuation.terminator.statement.eco
+    case kilometer;
+    case mile;
+}
+
+// stdlib/core/result.eco declares 'public enum result<T, E>', so a lowercase name must work too.
+public enum result
+// <------ storage.modifier.eco
+//     ^^^^ storage.type.class.eco
+//          ^^^^^^ entity.name.type.eco
+{
+    case ok;
+//       ^^ variable.other.enummember.eco
+}
+
+// An integer backing IS the discriminant - 'not_found' is tag 404, not tag 1.
+enum Status : int32
+//          ^ punctuation.separator.colon.eco
+//            ^^^^^ support.type.primitive.eco
+{
+    case ok = 200;
+//          ^ keyword.operator.assignment.eco
+//            ^^^ constant.numeric.integer.eco
+    case not_found = 404;
+//       ^^^^^^^^^ variable.other.enummember.eco
+}
+
+// A string backing numbers its cases from zero and recovers the spelling through value().
+enum Unit : string
+//          ^^^^^^ support.class.eco
+{
+    case meter = "m";
+//                ^ string.quoted.double.eco
+}
+
+// A payload list takes the same grammar as a function's parameter list.
+enum CurlError
+{
+    case cannot_resolve_host;
+//       ^^^^^^^^^^^^^^^^^^^ variable.other.enummember.eco
+    case timeout(int32 $after_seconds);
+//       ^^^^^^^ variable.other.enummember.eco
+//              ^ punctuation.section.parens.eco
+//               ^^^^^ support.type.primitive.eco
+//                     ^^^^^^^^^^^^^^ variable.other.eco
+    case http(int32 $code, string $body);
+//                       ^ punctuation.separator.comma.eco
+//                         ^^^^^^ support.class.eco
+    case blank();
+//       ^^^^^ variable.other.enummember.eco
+}
+
+// A generic enum carries its parameters across an instantiation.
+enum Slot<T>
+//   ^^^^ entity.name.type.eco
+{
+    case empty;
+    case filled(T $value);
+//              ^ entity.name.type.eco
+}
+
+// An enum body holds cases, methods, statics and operators. No properties, no constructors.
+enum Side
+{
+    case left;
+
+    static int32 $flips = 0;
+//  ^^^^^^ storage.modifier.eco
+//         ^^^^^ support.type.primitive.eco
+//               ^^^^^^ variable.other.eco
+
+    const function is_left() : bool
+//  ^^^^^ storage.modifier.eco
+//        ^^^^^^^^ storage.type.function.eco
+//                 ^^^^^^^ entity.name.function.eco
+//                             ^^^^ support.type.primitive.eco
+    {
+        return $this == Side::left;
+//      ^^^^^^ keyword.control.flow.eco
+//             ^^^^^ variable.language.this.eco
+//                   ^^ keyword.operator.comparison.eco
+//                      ^^^^ entity.name.type.eco
+//                          ^^ punctuation.separator.namespace.eco
+//                            ^^^^ entity.name.symbol.eco
+    }
+
+    static function both() : int32 { return 2; }
+//  ^^^^^^ storage.modifier.eco
+//                  ^^^^ entity.name.function.eco
+}
+
+// Cases are built by naming them. One taking nothing needs no parentheses.
+$a = DistanceUnit::meter;
+//   ^^^^^^^^^^^^ entity.name.type.eco
+//                 ^^^^^ entity.name.symbol.eco
+$b = CurlError::timeout(30);
+//              ^^^^^^^ entity.name.function.call.eco
+//                      ^^ constant.numeric.integer.eco
+
+// The backing accessor is synthesized, and reached like any other method.
+echo Status::not_found->value();
+// <---- keyword.other.echo.eco
+//                    ^^ keyword.operator.accessor.eco
+//                      ^^^^^ entity.name.function.member.eco
+
+// The leading dot, in all three destinations the shorthand accepts.
+DistanceUnit $unit = .kilometer;
+//                   ^ punctuation.accessor.dot.eco
+//                    ^^^^^^^^^ variable.other.enummember.eco
+echo describe(.meter);
+//            ^ punctuation.accessor.dot.eco
+//             ^^^^^ variable.other.enummember.eco
+
+function parse_one(int32 $n) : result
+{
+    return .ok($n);
+//         ^ punctuation.accessor.dot.eco
+//          ^^ variable.other.enummember.eco
+}
+
+// A generic written out in full.
+Slot<string> $s = .filled("hi");
+//                 ^^^^^^ variable.other.enummember.eco
+echo Slot<int32>::filled(9);
+//   ^^^^ entity.name.type.eco
+//              ^^ punctuation.separator.namespace.eco
+//                ^^^^^^ entity.name.function.call.eco
