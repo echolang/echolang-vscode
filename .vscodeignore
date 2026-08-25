@@ -3,15 +3,17 @@
 .gitignore
 .gitattributes
 vsc-extension-quickstart.md
+tsconfig.json
+src/**
 
-# Packages themselves, so building 0.3.0 does not ship a copy of every earlier build inside it.
+# Packages themselves, so building 0.5.0 does not ship a copy of every earlier build inside it.
 *.vsix
 
 # Build input, not a runtime asset. resources/logo_echo.png is generated from it — see CHANGELOG 0.3.0.
 resources/logo_echo.svg
 
-# The grammar regression suite and what runs it. Both are development-time only: the extension
-# contributes no code, so nothing here is reachable once it is installed.
+# The grammar regression suite and TypeScript sources. The runtime is dist/extension.js plus the
+# grammars; nothing in src/ or tests/ is reachable once it is installed.
 tests/**
 node_modules/**
 package-lock.json

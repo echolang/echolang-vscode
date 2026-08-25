@@ -3,7 +3,7 @@
     "displayName": "Echo Lang",
     "description": "The Echo programming language support for Visual Studio Code",
     "icon": "resources/logo_echo.png",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "publisher": "mario-deluna",
     "repository": {
         "type": "git",
@@ -15,15 +15,59 @@
     "categories": [
         "Programming Languages"
     ],
+    "main": "./dist/extension.js",
+    "activationEvents": [
+        "onLanguage:echo"
+    ],
     "scripts": {
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+        "build": "npm run esbuild-base -- --sourcemap",
+        "watch": "npm run esbuild-base -- --sourcemap --watch",
+        "check": "tsc --noEmit",
+        "vscode:prepublish": "npm run esbuild-base -- --minify",
         "test": "vscode-tmgrammar-test -g syntaxes/eco.tmLanguage.json \"tests/**/*.eco\"",
-        "package": "vsce package"
+        "package": "vsce package --no-dependencies"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^9.0.1"
     },
     "devDependencies": {
+        "@types/node": "^20.16.0",
+        "@types/vscode": "1.90.0",
         "@vscode/vsce": "^3.2.0",
+        "esbuild": "^0.24.0",
+        "typescript": "^5.6.0",
         "vscode-tmgrammar-test": "^0.1.3"
     },
     "contributes": {
+        "configuration": {
+            "title": "Echo",
+            "properties": {
+                "echo.echocPath": {
+                    "type": "string",
+                    "default": "",
+                    "scope": "machine-overridable",
+                    "description": "Path to the echoc binary. Empty means search PATH, then /usr/local/bin, /opt/homebrew/bin and ~/.echo/bin. ~ is expanded; relative paths are resolved from the workspace folder; a bare name like echoc is looked up on PATH."
+                },
+                "echo.trace.server": {
+                    "type": "string",
+                    "enum": ["off", "messages", "verbose"],
+                    "default": "off",
+                    "description": "Trace communication between VS Code and echoc lsp."
+                },
+                "echo.lsp.debug": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Log every LSP request and rebuild timing from echoc. Rebuild timings are always on; this adds per-hover/definition lines. See the Echo output channel."
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "echo.restartLanguageServer",
+                "title": "Echo: Restart Language Server"
+            }
+        ],
         "languages": [
             {
                 "id": "echo",

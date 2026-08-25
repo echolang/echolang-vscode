@@ -4,6 +4,22 @@ All notable changes to the "echolang-vscode" extension will be documented in thi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.5.0]
+
+The language server. `echoc lsp` is the server; this extension is now a client as well as a grammar.
+
+### Added
+
+- Starts `echoc lsp` over stdio when a `.eco` file is opened.
+- Diagnostics, hover, go-to-definition and the outline, as the server provides them.
+- `echo.echocPath` to point at a specific binary (`~` and workspace-relative paths are expanded). Searches `PATH`, then `/usr/local/bin`, `/opt/homebrew/bin` and `~/.echo/bin`.
+- `Echo: Restart Language Server`, which rediscovers the binary after you fix the setting.
+- If `echoc` is missing, highlighting still works and you get one notice per session.
+
+### Changed
+
+- The extension now ships TypeScript, bundled with esbuild. `vsce package` uses `--no-dependencies`.
+
 ## [0.4.0]
 
 Catching up with eight feature commits in the compiler. The 0.3.0 grammar was correct for the language as
