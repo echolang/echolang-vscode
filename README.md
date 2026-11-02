@@ -1,6 +1,6 @@
 # Echo for Visual Studio Code
 
-Syntax highlighting, inline diagnostics, hover, go-to-definition and the outline for [Echo](https://echoc.dev).
+Syntax highlighting, snippets, completion, inline diagnostics, hover, go-to-definition, rename, highlights, inlay hints and the outline for [Echo](https://echoc.dev).
 
 The language server is `echoc lsp`, so this extension is a client. Point it at a working `echoc` and the rest follows.
 
@@ -21,6 +21,18 @@ or `/usr/local/bin/echoc`, `/opt/homebrew/bin/echoc`, `~/.echo/bin/echoc`. A `~`
 If the setting is wrong, the extension stops and offers **Open Settings**. Highlighting still works with no binary at all; you get one polite notice per session.
 
 **Echo: Restart Language Server** rediscovers the binary after you fix the setting, without reloading the window.
+
+### What the server does
+
+Completion, rename, highlights and inlay hints come from `echoc lsp`, so they need an echoc newer than 0.7.0. An older one still gives diagnostics, hover, go-to-definition and the outline.
+
+- Completion after `$` (variables in scope), `->` (properties and methods), `::` (namespaces, statics, enum cases), `use`, `#[` and a leading `.` where the destination names the type.
+- **F2** renames across files, or says why it will not.
+- Inlay hints show the inferred type of `$x = ...`. Turn them off with `editor.inlayHints.enabled`.
+
+### Snippets
+
+Type the prefix and pick it from the suggestions: `function`, `sfunction`, `closure`, `constructor`, `destructor`, `struct`, `class`, `interface`, `enum`, `match`, `foreach`, `foreachk` (key and value), `for`, `while`, `if`, `ifelse`, `elseif`, `guard`, `unsafe`, `test`, `namespace`, `use`, and `cfg` for an `#[if: …] … #[end]` region. They work without `echoc`.
 
 ## Developing the extension
 

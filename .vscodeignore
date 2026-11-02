@@ -17,3 +17,9 @@ resources/logo_echo.svg
 tests/**
 node_modules/**
 package-lock.json
+
+# A test helper, not a runtime asset.
+scripts/**
+
+# `npm run watch` leaves a sourcemap in dist/; the minified release bundle does not reference it.
+**/*.map

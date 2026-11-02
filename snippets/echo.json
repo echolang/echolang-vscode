@@ -1,0 +1,117 @@
+{
+    "function": {
+        "prefix": "function",
+        "description": "Function declaration",
+        "body": ["function ${1:name}($2) : ${3:void}", "{", "\t$0", "}"]
+    },
+    "static function": {
+        "prefix": "sfunction",
+        "description": "Static member function",
+        "body": ["static function ${1:name}($2) : ${3:void}", "{", "\t$0", "}"]
+    },
+    "closure": {
+        "prefix": "closure",
+        "description": "Anonymous function",
+        "body": ["function($1) : ${2:void} { $0 }"]
+    },
+    "constructor": {
+        "prefix": "constructor",
+        "description": "Constructor",
+        "body": ["constructor($1)", "{", "\t$0", "}"]
+    },
+    "destructor": {
+        "prefix": "destructor",
+        "description": "Destructor",
+        "body": ["destructor()", "{", "\t$0", "}"]
+    },
+    "struct": {
+        "prefix": "struct",
+        "description": "Struct declaration",
+        "body": ["struct ${1:Name}", "{", "\t${2:int32} \\$${3:field};$0", "}"]
+    },
+    "class": {
+        "prefix": "class",
+        "description": "Class declaration",
+        "body": ["class ${1:Name}", "{", "\t${2:int32} \\$${3:field};$0", "}"]
+    },
+    "interface": {
+        "prefix": "interface",
+        "description": "Interface declaration",
+        "body": ["interface ${1:Name}", "{", "\tfunction ${2:name}() : ${3:void};$0", "}"]
+    },
+    "enum": {
+        "prefix": "enum",
+        "description": "Enum declaration",
+        "body": ["enum ${1:Name}", "{", "\tcase ${2:first};", "\tcase ${3:second};$0", "}"]
+    },
+    "match": {
+        "prefix": "match",
+        "description": "Match expression",
+        "body": ["match (${1:\\$value}) {", "\t${2:Type::case} => ${3:result},", "\telse => ${4:fallback},", "}"]
+    },
+    "foreach": {
+        "prefix": "foreach",
+        "description": "Loop over a collection",
+        "body": ["foreach (${1:\\$items} as ${2:\\$item}) {", "\t$0", "}"]
+    },
+    "foreach key value": {
+        "prefix": "foreachk",
+        "description": "Loop over a collection with keys",
+        "body": ["foreach (${1:\\$items} as ${2:\\$key} => ${3:\\$value}) {", "\t$0", "}"]
+    },
+    "for": {
+        "prefix": "for",
+        "description": "Counting loop",
+        "body": ["for (int32 \\$${1:i} = 0; \\$${1:i} < ${2:count}; \\$${1:i}++) {", "\t$0", "}"]
+    },
+    "while": {
+        "prefix": "while",
+        "description": "While loop",
+        "body": ["while (${1:condition}) {", "\t$0", "}"]
+    },
+    "if": {
+        "prefix": "if",
+        "description": "If statement",
+        "body": ["if (${1:condition}) {", "\t$0", "}"]
+    },
+    "if else": {
+        "prefix": "ifelse",
+        "description": "If / else statement",
+        "body": ["if (${1:condition}) {", "\t$2", "} else {", "\t$0", "}"]
+    },
+    "else if": {
+        "prefix": "elseif",
+        "description": "Else-if branch",
+        "body": ["else if (${1:condition}) {", "\t$0", "}"]
+    },
+    "guard": {
+        "prefix": "guard",
+        "description": "Unwrap an optional or leave",
+        "body": ["${1:int32} \\$${2:value} = guard ${3:expr()} else { ${4:return;} }"]
+    },
+    "unsafe": {
+        "prefix": "unsafe",
+        "description": "Unsafe block",
+        "body": ["unsafe {", "\t$0", "}"]
+    },
+    "test": {
+        "prefix": "test",
+        "description": "Test block",
+        "body": ["test ${1:name}", "{", "\t$0", "}"]
+    },
+    "namespace": {
+        "prefix": "namespace",
+        "description": "Namespace statement",
+        "body": ["namespace ${1:name};"]
+    },
+    "use": {
+        "prefix": "use",
+        "description": "Import a name",
+        "body": ["use ${1:std}::${2:name};"]
+    },
+    "conditional compilation": {
+        "prefix": ["cfg", "#if"],
+        "description": "Conditional compilation region",
+        "body": ["#[if: ${1:os == darwin}]", "$0", "#[end]"]
+    }
+}

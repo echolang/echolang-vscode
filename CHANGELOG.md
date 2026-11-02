@@ -4,6 +4,76 @@ All notable changes to the "echolang-vscode" extension will be documented in thi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.7.0]
+
+Nested projects resolve. The extension used to start one server, rooted at the first workspace folder.
+A file under another `module.eco`, such as an example app inside a library, was checked as a loose file,
+so the dependencies its own manifest declares were never read, and every `use` of them went red.
+
+### Changed
+
+- **One server per project.** Each Echo file is checked by a server started in the directory of its
+  nearest `module.eco`, exactly what `echoc build` there compiles. A file in no project goes to its
+  workspace folder's server, as before. A server whose project has no open file left stops after 30 s.
+- A file several projects compile, such as a dependency's source, is answered and reported by its own
+  project only, so hovers and problems don't show up twice.
+- Creating or deleting a `module.eco` restarts the servers, because files move between projects.
+
+### Known limits
+
+- Another project that compiles a file you are editing sees the edit on save.
+
+## [0.6.0]
+
+The language server stops going stale. It used to read the project once, at start: which files a module
+is made of, and where its dependencies are. A file created afterwards belonged to no module and went red.
+So did every call into it. A file deleted, a `git checkout`, an `epm` install or a `module.eco` saved from
+another tool did the same, and it stayed that way until *Echo: Restart Language Server*.
+
+### Added
+
+- The server is told when `.eco`/`.echo` files and `epm.lock.json` are created, changed or deleted on disk
+  (`workspace/didChangeWatchedFiles`). An echoc that understands those re-reads its project in place.
+- **Restart fallback for older echoc.** An echoc that does not advertise `experimental.echoWatchedFiles`
+  (0.7.0 and older) is restarted instead whenever a source is created or deleted, `module.eco` or
+  `epm.lock.json` changes, or a file the editor does not have open changes on disk. A burst of events,
+  such as a checkout, waits 500 ms to go quiet and restarts once. The Echo output channel says which
+  file triggered it.
+- The server restarts when the workspace folders change, since it takes its project root from the first one.
+- **Snippets** for the shapes you type all day: `function`, `struct`, `class`, `enum`, `interface`,
+  `match`, `foreach`/`foreachk`, `for`, `if`/`ifelse`/`elseif`, `guard`, `test`, `use`, and `cfg` for an
+  `#[if: …]` region. Every `$` sigil survives expansion. `npm test` checks that none is left unescaped.
+- Ready for completion from the server: a server keyword that a snippet already covers is dropped from
+  the list, and picking a function or method opens its parameter hints.
+
+### Changed
+
+- `echoc lsp` now runs in the workspace folder instead of inheriting the extension host's working directory.
+
+### Needs a newer echoc
+
+These are in the compiler, not the extension, and arrive with the echoc release after 0.7.0. The extension
+needs no update for them; it lights up whatever the server says it can do.
+
+- **Completion.** `$` offers the variables in scope with their types, `->` a value's properties and
+  methods (private ones only inside the type), `::` a namespace's functions and types or a type's enum
+  cases and statics, `use std::` the path, `.` after `return` or `Unit $u =` the destination's cases, and
+  `#[` the attributes. It answers from the text you are typing, so a variable declared a second ago is
+  already there.
+- **Rename** (F2) across files, including constructor calls, named arguments (`f($a: 1)`) and `use`
+  lines. It refuses rather than guesses: a standard library or package symbol, an operator, a name that
+  is also written inside a `test` block or an `#[if:]` region the compile does not see.
+- **Highlights** of every use of the symbol under the cursor, writes apart from reads.
+- **Inlay hints** with the inferred type in front of `$x = ...`, `foreach ... as $v` and other
+  declarations that do not write their type.
+
+- A struct literal of a module's type, written in a file outside that module's sources (`m::P{ $a: 1 }`),
+  crashed `echoc lsp` with a segfault. Combined with the stale project, *creating a file and using a type
+  in it* was enough to trigger it.
+- A `module.eco` that could not be resolved, such as one with a `#[depends:]` pointing at a missing
+  directory, was silently compiled file by file. Every cross-file reference went red and nothing said why.
+  The problem is now a diagnostic on the offending `module.eco` line.
+
 ## [0.5.0]
 
 The language server. `echoc lsp` is the server; this extension is now a client as well as a grammar.
